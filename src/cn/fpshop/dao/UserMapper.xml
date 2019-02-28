@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.fpshop.dao.UserMapper">
+	<select id="login" parameterType="cn.fpshop.pojo.User"
+		resultType="cn.fpshop.pojo.User">
+		select * from user where username = #{username} AND
+		password = #{password} OR email = #{email} AND password = #{password}
+	</select>
+
+	<update id="modifyUser" parameterType="User">
+		update user
+		<set>
+			uname = #{uname} ,
+			email = #{email} ,
+			age = #{age} ,
+			sex = #{sex} ,
+			telephone = #{telephone} ,
+			<if test="money != 0.0">
+				money = #{money}
+			</if>
+		</set>
+		<where>
+			uid = #{uid}
+		</where>
+	</update>
+
+	<!-- 获取正在使用的用户 -->
+	<select id="getUser" parameterType="String" resultType="User">
+		select * from user
+		<where>
+			uid = #{uid}
+		</where>
+	</select>
+
+	<!-- 获取用户的地址List -->
+	<select id="getAddress" parameterType="String"
+		resultType="Address">
+		select * from address where uid = #{uid}
+	</select>
+
+	<!-- 修改地址 -->
+	<update id="updateAdd" parameterType="Address">
+		update address set
+			name = #{name},
+			tel = #{tel},
+			address = #{address}
+		where aid = #{aid}
+	</update>
+	
+	<!-- 添加地址 -->
+	<insert id="addAddress" parameterType="Address" >
+		insert into address (uid,name,tel,address,defaultAdd) values (#{uid},#{name},#{tel},#{address},0)
+	</insert>
+	
+	<!-- 删除地址 -->
+	<delete id="delAdd" parameterType="Address">
+		delete from address where aid = #{aid}
+	</delete>
+	
+	<!-- 修改默认地址 -->
+	<update id="setDefaultAdd" parameterType="Address">
+		UPDATE address set defaultAdd = 
+			(
+				CASE 
+					when aid = #{aid} then 1
+					else 0 
+				END
+			)
+			WHERE uid = #{uid}
+	</update>
+	
+	<!-- 获取用户默认地址 -->
+	<select id="getDefaultAdd" parameterType="String" resultType="Address">
+		select * from address where uid = #{uid} and defaultAdd = 1
+	</select>
+	
+	<select id = "getAllUser" resultType="User">
+		select * from user
+	</select>
+	
+	<select id = "orderByMoney" resultType="User">
+		select * from user 
+		<if test="money != null and money != ''">
+			<if test="money =='asc'">order by money ASC</if>
+			<if test="money =='desc'">order by money DESC</if>
+		</if>
+	</select>
+	
+	<select id = "orderByConsume"  resultType="User">
+		select u.* from `order` o,address a ,`user` u WHERE (o.aid=a.aid) and (a.uid=u.uid) and (state!=0) GROUP BY a.uid 
+		<if test="consume != null and consume != ''">
+			<if test="consume =='asc'">order by SUM(total) ASC</if>
+			<if test="consume =='desc'">order by SUM(total) DESC</if>
+		</if>
+	</select>
+	
+</mapper>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.fpshop.dao.ProductMapper">
+	<select id="getHotProducts" resultType="Product">
+		select p.*  from orderitem o,product p WHERE (p.pid=o.pid) and (amount!=0) group by pid  order by SUM(count) desc LIMIT 1,10 
+	</select>
+	
+	<select id="getNewProducts" resultType="Product">
+		select * from product WHERE (amount!=0) order by pdate desc LIMIT 1,10
+	</select>
+	
+	<select id="getCategoryList" resultType="Category">
+		select * from category
+	</select>
+
+
+	<!-- 获取类别商品数量 -->
+	<select id = "getCount" parameterType="String" resultType="Integer">
+		select count(*) from product where cid = #{cid}
+	</select>
+	
+	<!-- 获取页面内的商品列 -->
+	<select id = "getProductListByPage" resultType="Product">
+		select * from product where cid = #{0} limit #{1},10
+	</select>
+	
+	<!-- 获取商品信息 -->
+	<select id="getProductInfo" parameterType="String" resultType="Product">
+		select * from product where pid = #{pid}
+	</select>
+	
+	<!-- 修改类别 -->
+	<update id="modifyCategory">
+		update category set cname = #{1} where cid = #{0}
+	</update>
+	
+	<!-- 添加类别 -->
+	<insert id="addCategory" parameterType="String">
+		insert into category (cname) values (#{cname});
+	</insert>
+	
+	<delete id="delCategory" parameterType="String">
+		delete from category where cid = #{cid}
+	</delete>
+	
+	<!-- 获取所有商品 -->
+	<select id="getAllproduct" resultType="Product">
+		select * from product
+	</select>
+	
+	<!-- 按条件获取商品 -->
+	<select id="getProductByDetails" resultType="product">
+		select * from product 
+		where 1=1
+		<if test="cid != null and cid != ''">
+			and cid = #{cid}
+		</if>
+		<if test="price != null and price != ''">
+			<if test="price =='asc'">order by price ASC</if>
+			<if test="price =='desc'">order by price DESC</if>
+		</if>
+		<if test="amount != null and amount != ''">
+			<if test="amount =='asc'">order by amount ASC</if>
+			<if test="amount =='desc'">order by amount DESC</if>
+		</if>
+	</select>
+	
+	<update id="modifyProduct" parameterType="product">
+		update product
+		<set>
+			pname = #{pname},
+			price = #{price},
+			amount = #{amount},
+			pdesc = #{pdesc}
+		</set>
+		<where>
+			pid = #{pid}
+		</where>
+	</update>
+	
+	
+</mapper>
